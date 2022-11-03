@@ -2,28 +2,33 @@
  
 pragma solidity >=0.8.0 <=0.8.17;
  
+import './Sponsor_Funding.sol';
  
 contract CrowdFunding {
  
    uint public fundingGoal;
-   uint public currentFund;
    enum State {
        nefinantat,
        prefinantat,
        finantat
    }
    State currentState;
+   address payable owner;
  
-   mapping (address => contribuitor) contribuitors; //variabila de tip mapping
-   struct contribuitor {
+   mapping (address => Contribuitor) contribuitors; //variabila de tip mapping
+   struct Contribuitor {
        string name;
-       uint age;
        uint balance;
    }
  
-   constructor() {
+   constructor(uint _fundingGoal) {
        currentState=State.nefinantat;
-       currentFund=0;
+       fundingGoal = _fundingGoal;
+       owner = payable(msg.sender);
+   }
+ 
+   function getCrowdFundingBalance() external view returns (uint) {
+       return address(this).balance;
    }
  
    function getCurrentState() public view returns (string memory) {
@@ -36,28 +41,51 @@ contract CrowdFunding {
        return "";
    }
  
-   function getCurrentFund() external view returns (uint) {
-       return currentFund;
-   }
    modifier nefinantatState() {
-        require(currentState==State.prefinantat, "You can no longer contribute ");
+        require(currentState==State.nefinantat, "You can no longer contribute/withdraw ");
         _;
    }
-   function contribute() payable external nefinantatState {
+ 
+   modifier onlyOwner() {
+       require(msg.sender == owner, "You don't have access to this feature");
+       _;
+   }
+ 
+   function contribute(string calldata name) payable external nefinantatState {
        require(msg.value>0, "You don't have enough money");
-       contribuitors[msg.sender].balance +=msg.value;
-       currentFund +=msg.value;
-       if(currentFund == fundingGoal) {
+       address payable contribuitorAddr = payable(msg.sender);
+       Contribuitor memory contribuitor = Contribuitor(name, msg.value);
+       contribuitor.balance += contribuitors[contribuitorAddr].balance;
+       contribuitors[contribuitorAddr]= contribuitor;
+ 
+       if(address(this).balance >= fundingGoal) {
            currentState = State.prefinantat;
        }
    }
  
    function withdraw(uint amount) payable external nefinantatState {
        address payable user = payable(msg.sender);
-       require(amount<=contribuitors[user].balance, "amount too big");
+       require(amount<=contribuitors[user].balance, "Amount too big");
        contribuitors[user].balance= contribuitors[user].balance - amount;
        user.transfer(amount);
    }
+ 
+   function communicateToSponsorFunding(address sponsorAddress) external onlyOwner payable {
+       require(currentState == State.prefinantat, "You cannot communicate with SponsorFunding.");
+       (bool successTransaction, ) = payable(sponsorAddress).call(abi.encodeWithSignature("sponsorCrowdFunding()"));
+       require(successTransaction, "Transaction failed");
+       currentState = State.finantat;
+ 
+   }
+ 
+   // function transferToDistributeFunding() external onlyOwner {
+   //     require(currentState == State.finantat, "You cannot transfer current fund to DistributeFunding");
+   // }
+ 
+   receive() external payable {
+ 
+   }
+ 
  
 }
 
