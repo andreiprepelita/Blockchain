@@ -22,6 +22,7 @@ contract CrowdFunding {
        uint balance;
    }
    bool private isDistributed;
+  
    constructor(uint _fundingGoal) {
        currentState=State.nefinantat;
        fundingGoal = _fundingGoal;
@@ -87,7 +88,7 @@ contract CrowdFunding {
    verifyCurentState(State.finantat, "You cannot communicate with DistributeFunding.")
    {
        require(isDistributed == false, "You have already distributed the amount");
-       (bool successTransaction, ) = distributeAddress.call {value: address(this).balance}
+       (bool successTransaction, ) = distributeAddress.call {value: address(this).balance }
                                      (abi.encodeWithSignature("communicateTransfer()"));
        require(successTransaction, "Transaction failed");
        isDistributed  = true;
@@ -95,8 +96,9 @@ contract CrowdFunding {
    }
  
    receive() external payable {
-      
-   }
+    
+  }
  
 }
+ 
 

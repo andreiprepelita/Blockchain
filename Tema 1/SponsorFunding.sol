@@ -33,24 +33,21 @@ contract SponsorFunding {
    }
  
    function addBalanceChangePercent(uint _percentage) external payable onlyOwner verifyPercentage(_percentage){
-       require(msg.value>0, "You don't have enough money");
        percentage = _percentage;
    }
  
    function sponsorCrowdFunding() external payable verifyPrefinantatState {
-       address payable addressCrowdFunding = payable(msg.sender);
-       uint balanceIndicator = 1;
-       if(percentage * addressCrowdFunding.balance / 100 > address(this).balance)
-           balanceIndicator = 0;
- 
-       addressCrowdFunding.transfer(percentage * addressCrowdFunding.balance / 100 * balanceIndicator);
-      
-   }
+      address payable addressCrowdFunding = payable(msg.sender);
+      uint balanceIndicator = 1;
+      if(percentage * addressCrowdFunding.balance / 100 > address(this).balance)
+          balanceIndicator = 0;
+      addressCrowdFunding.transfer(percentage * addressCrowdFunding.balance / 100 * balanceIndicator);
+    
+  }
  
    function getSponsorFundingBalance() external view returns (uint) {
        return address(this).balance;
    }
  
 }
- 
 

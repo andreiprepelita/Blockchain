@@ -13,9 +13,13 @@ contract DistributeFunding {
    mapping (address => ShareHolder) private shareholders;
    bool private isDistributed;
    uint8 private totalPercentage;
+   uint private totalSumReceived;
+   address payable owner;
  
    constructor() {
-       isDistributed=false;
+       isDistributed = false;
+       totalSumReceived = 0;
+       owner = payable(msg.sender);
    }
  
    modifier verifyFinantatState() {
@@ -40,6 +44,11 @@ contract DistributeFunding {
        require(shareholders[payable(msg.sender)].hasReceived == false, "You have already received the funds");
        _;
    }
+   //optional
+   modifier onlyOwner() {
+       require(msg.sender == owner, "You don't have access to this feature");
+       _;
+   }
  
    function becomeAShareHolder(uint8 _percentage) external
    verifyShareHolder(_percentage)
@@ -52,23 +61,39 @@ contract DistributeFunding {
  
    function communicateTransfer() external payable verifyFinantatState {
        require(isDistributed == false, "Funds have already been received ");
+       totalSumReceived = address(this).balance;
        isDistributed = true;
    }
  
    function withdraw() external payable validateWithdraw {
        address payable user = payable(msg.sender);
-       uint amount = shareholders[payable(msg.sender)].percentage / 100 * address(this).balance;
+       uint amount = shareholders[user].percentage * totalSumReceived / 100;
        shareholders[user].hasReceived = true;
        user.transfer(amount);
    }
  
-   function getCrowdFundingBalance() external view returns (uint) {
-       return address(this).balance;
+   function getMyPercentage() external view returns (uint8) {
+       return shareholders[msg.sender].percentage;
    }
  
-   receive() external payable {
+   function getDistributeFundingBalance() external view returns (uint) {
+       return address(this).balance;
+   }
+   //optional
+   function getRemainingPercentage() external payable onlyOwner {
+       require(isDistributed==true);
+       require(totalPercentage<100);
+       uint amount = (100-totalPercentage) * totalSumReceived / 100;
+       totalPercentage = 100;
+       owner.transfer(amount);
       
    }
  
+   receive() external payable {
+    
+  }
+ 
+ 
 }
+ 
 
