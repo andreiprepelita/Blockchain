@@ -4,17 +4,14 @@ pragma solidity >=0.8.0 <=0.8.17;
  
 import './Crowd_Funding.sol';
  
- 
 contract SponsorFunding {
  
-   uint percentage;
+   uint public percentage;
    address payable owner;
-   bool fundingGoalReady;
  
    constructor(uint _percentage) payable verifyPercentage(_percentage) {
-       percentage = _percentage;s
+       percentage = _percentage;
        owner = payable(msg.sender);
-       fundingGoalReady = false;
    }
  
    modifier onlyOwner() {
@@ -49,16 +46,10 @@ contract SponsorFunding {
        addressCrowdFunding.transfer(percentage * addressCrowdFunding.balance / 100 * balanceIndicator);
       
    }
-  
-   function transferOwnBalanceToCrownFunding() external payable onlyOwner {
-       require(fundingGoalReady, "Lack of CrowdFunding communication");
  
+   function getSponsorFundingBalance() external view returns (uint) {
+       return address(this).balance;
    }
- 
-   receive () external payable {
- 
-   }
- 
  
 }
  
