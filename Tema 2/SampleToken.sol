@@ -8,9 +8,11 @@ contract SampleToken {
     string public symbol = "TOK";
 
     uint256 public _totalSupply;
+    uint256 private _totalSales;
 
     address owner;
-    
+    address sampleTokenSaleAddress;
+
     event Transfer(address indexed _from,
                    address indexed _to,
                    uint256 _value);
@@ -38,6 +40,8 @@ contract SampleToken {
         balances[msg.sender] = _initialSupply;
         _totalSupply = _initialSupply;
         owner = msg.sender;
+        _totalSales = 0;
+        sampleTokenSaleAddress = msg.sender;
 
         emit Transfer(address(0), msg.sender, _totalSupply);
     }
@@ -55,6 +59,7 @@ contract SampleToken {
         balances[msg.sender] -= _value;
         balances[_to] += _value;
 
+        minting(_value);
         emit Transfer(msg.sender, _to, _value);
         return true;
     }
@@ -84,5 +89,21 @@ contract SampleToken {
         return _allowance[_owner][_spender];
     }
 
+    function setTokenSaleAddress(address _tokenSaleAddress) external onlyOwner {
+        sampleTokenSaleAddress = _tokenSaleAddress;
+    }
+
+    function minting(uint256 _value) private {
+
+        _totalSales += _value;
+
+        while(_totalSales > 10000){
+            _totalSales -=10000;
+            balances[owner] +=1;
+            _totalSupply +=1;
+            _allowance[owner][sampleTokenSaleAddress] +=1;
+            emit Transfer(address(0), owner, 1);
+        }
+    }
     
 }
