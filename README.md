@@ -1,7 +1,8 @@
 # Blockchain
 
 
-TEMA 2
+TEMA 2 Enunt
+
 Sursa data in fisierul: SampleToken.sol (adaptare dupa un exemplu din "Blockchain by Example" - B. Badr, R. Horrocks, X. Wu), include doua contracte: un exemplu simplificat de token ERC-20 - SampleToken si un contract folosit pentru vanzarea acestui token - SampleTokenSale. Proprietarul tokenului va instantia mai intai contractul token cu o suma totala disponibila pentru token ce este asociata balantei proprietarului, dupa care va instantia contractul de vanzare, pentru a vinde tokenul respectiv prin intermediul acestuia.
 In forma curenta contractul de vanzare nu are acces initial la fonduri. Pentru a vinde tokenul, proprietarul trebuie sa transfere periodic din fondurile proprii de token catre balanta contractului de vanzare folosind metoda transfer. Contractul de vanzare foloseste de asemenea metoda transfer in cadrul vanzarii.
 
